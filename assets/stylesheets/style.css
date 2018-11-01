@@ -90,7 +90,6 @@ label{
 }
 
 .radio-toolbar label {
-
   display: inline-block;
   background-color: #ddd;
   padding: 4px 11px;
@@ -100,7 +99,7 @@ label{
 }
 
 .radio-toolbar input[type="radio"]:checked+label {
-  background-color: #bbb;
+  background-color: orange;
 }
 
 
