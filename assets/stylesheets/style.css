@@ -96,6 +96,7 @@ label{
   font-family: "outset";
   font-size: 16px;
   cursor: pointer;
+  border-style: dotted;
 }
 
 .radio-toolbar input[type="radio"]:checked+label {
