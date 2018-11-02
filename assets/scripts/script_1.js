@@ -28,7 +28,7 @@ function donutChart() {
         cornerRadius, // sets how rounded the corners are on each slice
         percentFormat = d3.format(',.1%');
 
-    function chart(selection){
+    function chart(selection){98abc5", 
         selection.each(function(data) {
             // generate chart
 
