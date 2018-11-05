@@ -72,15 +72,15 @@ nav ul li a {
 
 body {
     font-size: 14px;
-    font-family: "Muli", "Gill Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: "Times New Roman", Times, serif;
 }
 
 text{
-    font-family: "Muli", "Gill Sans", "Helvetica Neue", Helvetica, Arial, sans-serif !IMPORTANT;
+    font-family: "Times New Roman", Times, serif !IMPORTANT;
 }
 
 label{
-  font-family: "Muli", "Gill Sans", "Helvetica Neue", Helvetica, Arial, sans-serif !IMPORTANT;
+  font-family: "Times New Roman", Times, serif !IMPORTANT;
      border-radius: 5px !IMPORTANT;
 }
 
@@ -92,15 +92,15 @@ label{
 .radio-toolbar label {
 
   display: inline-block;
-  background-color: #ddd;
+  background-color: #ff8000;
   padding: 4px 11px;
   font-family: "Muli";
-  font-size: 16px;
+  font-size: 25px;
   cursor: pointer;
 }
 
 .radio-toolbar input[type="radio"]:checked+label {
-  background-color: #bbb;
+  background-color: #80ff00;
 }
 
 
