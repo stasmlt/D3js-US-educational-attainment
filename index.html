@@ -3,50 +3,53 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <head>
     <meta charset="UTF-8">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <title>Educational Attainment in the United States</title>
-	
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link href="assets/stylesheets/style.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css?family=Muli" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-	
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-    <script src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
-	
     <script type="text/javascript" src="mouseover.js"></script>
     <script src='https://code.responsivevoice.org/responsivevoice.js'></script>
 </head>
   <header>
        <nav>
+    <ul id="nav">
+      <li><a href="D3jsGraphs.html" onmouseover="playclip();">D3jsGraphs</a></li>
+      <li><a href="#top"  onmouseover="playclip();">Top</a></li>
+      <li><a href="#national" onclick="maskandshow('nat');" onmouseover="playclip();">National</a></li>
+      <li><a href="#regional" onclick="maskandshow('reg');" onmouseover="playclip();">Regional</a></li>
+      <li><a href="#state" onclick="maskandshow('stl');" onmouseover="playclip();">State-Level</a></li>
     <ul>
-      <li><a href="#top" onmouseover="playclip();" >Top</a></li>
-      <li><a href="#national" onmouseover="playclip();" >National</a></li>
-      <li><a href="#regional" onmouseover="playclip();" >Regional</a></li>
-      <li><a href="#state" onmouseover="playclip();" >State-Level</a></li>
-    <ul>
-       </nav>
+        </nav>
     </header>
+	       
 <body>
-    <h1 class="title" onmouseover="responsiveVoice.speak('Educational Attainment in the United States','US English Female');" onmouseleave="responsiveVoice.cancel();">Educational Attainment in the United States</h1>
-        
-	
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script type="text/javascript">
+	$(window).on('resize', function(){
+           var win = $(this); 
+           if (win.width() > 800) 
+        });
+</script>
+
+	<h1 class="title" onmouseover="responsiveVoice.speak('Educational Attainment in the United States','US English Female');" onmouseleave="responsiveVoice.cancel();">Educational Attainment in the United States</h1>
+   
+	<div class="mask" id="nat">
 	<p><br></p>
-    <h2 class="subtitle" onmouseover="responsiveVoice.speak('Nation-Wide Education Level of Population in Schooling','US English Female');" onmouseleave="responsiveVoice.cancel();">Nation-Wide Education Level of Population in Schooling</h2>
+     <h2 class="subtitle" onmouseover="responsiveVoice.speak('Nation-Wide Education Level of Population in Schooling','US English Female');" onmouseleave="responsiveVoice.cancel();">Nation-Wide Education Level of Population in Schooling</h2>
+           <svg id="pie-chart" width="960" height="450"></svg><a name="reg"></a>
+	</div>
 	
-    <svg id="pie-chart" width="960" height="450"></svg><a name="regional"></a>
-	
-	
+    <div class="mask" id="reg">
     <p><br><br><br></p>
-   <h2 class="subtitle" onmouseover="responsiveVoice.speak('Educational Attainment: Region-level Breakdown of University Students','US English Female');" onmouseleave="responsiveVoice.cancel();">Educational Attainment: Region-level Breakdown of University Students</h2>
+    <h2 class="subtitle" onmouseover="responsiveVoice.speak('Educational Attainment: Region-level Breakdown of University Students','US English Female');" onmouseleave="responsiveVoice.cancel();">Educational Attainment: Region-level Breakdown of University Students</h2>
 	
     <form id="tree-form">
         <div class="radio-toolbar">
             <input type="radio" id="mode1" name="treeSum" value="number" checked>
             <label for="mode1" onmouseover="responsiveVoice.speak('Pursuing a Masters degree (in # of students)','US English Female');" onmouseleave="responsiveVoice.cancel();">Pursuing a Masters degree (in # of students)</label>
             <input type="radio" id="mode2" name="treeSum" value="percent">
-            <label for="mode2" onmouseover="responsiveVoice.speak('Pursuing a Masters degree (in %)','US English Female');" onmouseleave="responsiveVoice.cancel();">Pursuing a Masters degree (in %)</label>
+            <label for="mode2" onmouseover="responsiveVoice.speak('Pursuing a Masters degree (in %)','US English Female');" onmouseleave="responsiveVoice.cancel();" >Pursuing a Masters degree (in %)</label>
             <input type="radio" id="mode3" name="treeSum" value="male">
             <label for="mode3" onmouseover="responsiveVoice.speak('Males in College (18-24yrs)(in %)','US English Female');" onmouseleave="responsiveVoice.cancel();">Males in College (18-24yrs)(in %)</label>
             <input type="radio" id="mode4" name="treeSum" value="femal">
@@ -55,29 +58,64 @@
     </form>
 	<p></p>
     <div id="chart"></div>
+	</div>
+	
+	<div class="mask" id="stl">
 	<a name="state"></a>
     <p><br><br></p>
     <h2 class="subtitle" onmouseover="responsiveVoice.speak('Education Level of Population in Schooling: State-level Breakdown','US English Female');" onmouseleave="responsiveVoice.cancel();">Education Level of Population in Schooling: State-level Breakdown</h2>
-
+	
     <form id="stack-form">
         <div class="radio-toolbar">
             <input type="radio" id="radio1" name="mode" value="bypercent" checked>
             <label for="radio1" onmouseover="responsiveVoice.speak('Students (in %)','US English Female');" onmouseleave="responsiveVoice.cancel();">Students (in %)</label>
             <input type="radio" id="radio2" name="mode" value="bycount">
             <label for="radio2" onmouseover="responsiveVoice.speak('Students (in number of people)','US English Female');" onmouseleave="responsiveVoice.cancel();">Students (in number of people)</label>
-    </div>
+        </div>
     </form>
     <div>
         <svg id="stacked-bar-chart"></svg>
     </div>
-
-    
+	</div>
+	
+	
 <script src="https://d3js.org/d3.v4.min.js"></script>
-<script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 <script src="assets/scripts/script_1.js"></script>
 <script src="assets/scripts/script_2.js"></script>
 <script src="assets/scripts/script_3.js"></script>
 <script>
+	
+	//https://brendansudol.com/writing/responsive-d3
+	
+	function responsivefy(svg) {
+    // get container + svg aspect ratio
+    var container = d3.select(svg.node().parentNode),
+        width = parseInt(svg.style("width")),
+        height = parseInt(svg.style("height")),
+        aspect = width / height;
+
+    // add viewBox and preserveAspectRatio properties,
+    // and call resize so that svg resizes on inital page load
+    svg.attr("viewBox", "0 0 " + width + " " + height)
+        .attr("perserveAspectRatio", "xMinYMid")
+        .call(resize);
+
+    // to register multiple listeners for same event type, 
+    // you need to add namespace, i.e., 'click.foo'
+    // necessary if you call invoke this function for multiple svgs
+    // api docs: https://github.com/mbostock/d3/wiki/Selections#on
+    d3.select(window).on("resize." + container.attr("id"), resize);
+
+    // get width of container and resize svg to fit it
+    function resize() {
+       
+        svg.attr("width", null);
+        svg.attr("height", null);
+    }
+}
+	
     $( document ).ready(function() {
       $(window).scroll(function(){
         if ($(window).scrollTop() >= 300) {
@@ -91,15 +129,26 @@
 /* scrollTop() >= 240
    Should be equal the the height of the header
  */
-</script>
-       <audio>
-	  <source src="beep.mp3"></source>
-	  <source src="beep.ogg"></source>
+	
+	function maskandshow(id){
+        if (document.getElementById) {
+          var divid = document.getElementById(id);
+          var divs = document.getElementsByClassName("mask");
+          for(var i=0;i<divs.length;i++) {
+            divs[i].style.display = "none";
+          }
+          divid.style.display = "block";
+        } 
+        return false;
+ }
+     document.getElementById("reg").style.display = "none";
+     document.getElementById("stl").style.display = "none";
+ </script>
+<audio>
+	  <source src="zapsplat_multimedia_click.mp3"></source>
+          <source src="zapsplat_multimedia_click.ogg"></source>
        </audio>
-	 
-	 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-
+      
 </body>
 </html>
+	
