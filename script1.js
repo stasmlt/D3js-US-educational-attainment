@@ -16,12 +16,12 @@ var nodes = [
       { name: "EU Countries"},
       { name: "Belgium=732p", target: [0], value: 28 },
       { name: "Bulgaria=708p", target: [0], value: 28 },  
-      { name: "Denmark=178p", target: [0], value: 28 },
+      { name: "France=2.878p", target: [0], value: 28 },
       { name: "Germany=3.459p", target: [0], value: 28 }, 
       { name: "Greece=793p", target: [0], value: 28 }, 
       { name: "Spain=1.689p", target: [0], value: 28 },
       { name: "Cyprus=57p", target: [0], value: 28 },
-      { name: "Italy=3.428p", target: [0], value: 28 },
+      { name: "Albania=28p", target: [0], value: 28 },
       { name: "Poland=2.938p", target: [0], value: 28 },
       { name: "UK=1.804p", target: [0], value: 28 },
       { name: "Portugal=624p", target: [0], value: 28 },
@@ -30,7 +30,7 @@ var nodes = [
       { name: "Austria=479p", target: [0], value: 28 },
       { name: "Norway=117p", target: [0], value: 28 },
       { name: "Malta=11p", target: [0], value: 28 },
-      { name: "Hungary=644p", target: [0], value: 28 },
+      { name: "Croatia=44p", target: [0], value: 28 },
       { name: "Estonia=67p", target: [0], value: 28 },
 ];
 
