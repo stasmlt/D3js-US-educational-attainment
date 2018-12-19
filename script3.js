@@ -1,275 +1,242 @@
-var el_id = 'chart';
-var treeSumSortType = "number";
+var donut = donutChart()
+        .width(960)
+        .height(450)
+        .cornerRadius(0) // sets how rounded the corners are on each slice
+        .padAngle(0.005) // effectively dictates the gap between slices
+        .variable('Percent')
+        .category('Education Level');
 
-var obj = document.getElementById(el_id);
+    d3.tsv('assets/data/species.tsv', function(error, data) {
+        if (error) throw error;
+        d3.select('#pie-chart')
+            .datum(data) // bind data to the div
+            .call(donut); // draw chart in div
+    });
 
-var divWidth = obj.offsetWidth;
+function donutChart() {
+    var width,
+        height,
+        margin = {top: 10, right: 10, bottom: 10, left: 10},
+        colour = d3.scaleOrdinal().range(["#0a5971", "#177E89", "#4b8e77", "#a9ad70", "#ccb221", "#cb8b25", "#DB3A34"]), // colour scheme
+        variable, // value in data that will dictate proportions on chart
+        category, // compare data by
+        padAngle, // effectively dictates the gap between slices
+        floatFormat = d3.format('.4r'),
+        cornerRadius, // sets how rounded the corners are on each slice
+        percentFormat = d3.format(',.1%');
 
-var margin = {top: 30, right: 0, bottom: 20, left: 0},
-    width = divWidth,
-    height = 500 - margin.top - margin.bottom,
-    formatNumber = d3.format(","),
-    transitioning;
+    function chart(selection){
+        selection.each(function(data) {
+            // generate chart
 
-var color = d3.scaleLinear().domain([0, 1/4*5000000, 2/4*5000000, 3/4*5000000, 5000000]).range(["#df80ff", "#cc00cc", "#800080", "#ffb3ff"]);
+            // ===========================================================================================
+            // Set up constructors for making donut. See https://github.com/d3/d3-shape/blob/master/README.md
+            var radius = Math.min(width, height) / 2;
 
-// sets x and y scale to determine size of visible boxes
-var x = d3.scaleLinear()
-    .domain([0, width])
-    .range([0, width]);
+            // creates a new pie generator
+            var pie = d3.pie()
+                .value(function(d) { return floatFormat(d[variable]); })
+                .sort(null);
 
-var y = d3.scaleLinear()
-    .domain([0, height])
-    .range([0, height]);
+            // contructs and arc generator. This will be used for the donut. The difference between outer and inner
+            // radius will dictate the thickness of the donut
+            var arc = d3.arc()
+                .outerRadius(radius * 0.8)
+                .innerRadius(radius * 0.6)
+                .cornerRadius(cornerRadius)
+                .padAngle(padAngle);
 
-var treemap = d3.treemap()
-        .size([width, height])
-        .paddingInner(0)
-        .round(false);
+            // this arc is used for aligning the text labels
+            var outerArc = d3.arc()
+                .outerRadius(radius * 0.9)
+                .innerRadius(radius * 0.9);
+            // ===========================================================================================
 
-var svg = d3.select('#'+el_id).append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.bottom + margin.top)
-    .style("margin-left", -margin.left + "px")
-    .style("margin.right", -margin.right + "px")
-    .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-        .style("shape-rendering", "crispEdges");
+            // ===========================================================================================
+            // append the pieChartSVG object to the selection
+            var pieChartSVG = selection
+               .attr('width', width + margin.left + margin.right)
+               .attr('height', height + margin.top + margin.bottom)
+              .append('g')
+                .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
+            // ===========================================================================================
 
-var grandparent = svg.append("g")
-        .attr("class", "grandparent");
+            // ===========================================================================================
+            // g elements to keep elements within svg modular
+            pieChartSVG.append('g').attr('class', 'slices');
+            pieChartSVG.append('g').attr('class', 'labelName');
+            pieChartSVG.append('g').attr('class', 'lines');
+            // ===========================================================================================
 
-    grandparent.append("rect")
-        .attr("y", -margin.top)
-        .attr("width", width)
-        .attr("height", margin.top)
-        .attr("fill", '#ff3300');
+            // ===========================================================================================
+            // add and colour the donut slices
+            var path = pieChartSVG.select('.slices')
+                .datum(data).selectAll('path')
+                .data(pie)
+              .enter().append('path')
+                .attr('fill', function(d) { return colour(d.data[category]); })
+                .attr('d', arc);
+            // ===========================================================================================
 
-    grandparent.append("text")
-        .attr("x", 10)
-        .attr("y", 10 - margin.top)
-        .attr("dy", ".75em");
+            // ===========================================================================================
+            // add text labels
+            var label = pieChartSVG.select('.labelName').selectAll('text')
+                .data(pie)
+              .enter().append('text')
+                .attr('dy', '.35em')
+                .html(function(d) {
+                    // add "key: value" for given category. Number inside tspan is bolded in stylesheet.
+                    return d.data[category] + ': <tspan>' + percentFormat(d.data[variable]) + '</tspan>';
+                })
+                .attr('transform', function(d) {
 
-d3.json("assets/data/us.json", function(data) {
-    var root = d3.hierarchy(data);
+                    // effectively computes the centre of the slice.
+                    // see https://github.com/d3/d3-shape/blob/master/README.md#arc_centroid
+                    var pos = outerArc.centroid(d);
 
-    treemap(root
-        .sum(function (d) {
-            if (treeSumSortType == "number") {
-                return d["Total College"];
-            } else {
-                return d["Percent College"];
+                    // changes the point to be on left or right depending on where label is.
+                    pos[0] = radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
+                    return 'translate(' + pos + ')';
+                })
+                .style('text-anchor', function(d) {
+                    // if slice centre is on the left, anchor text to start, otherwise anchor to end
+                    return (midAngle(d)) < Math.PI ? 'start' : 'end';
+                });
+            // ===========================================================================================
+
+            // ===========================================================================================
+            // add lines connecting labels to slice. A polyline creates straight lines connecting several points
+            var polyline = pieChartSVG.select('.lines')
+                .selectAll('polyline')
+                .data(pie)
+              .enter().append('polyline')
+                .attr('points', function(d) {
+
+                    // see label transform function for explanations of these three lines.
+                    var pos = outerArc.centroid(d);
+                    pos[0] = radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
+                    return [arc.centroid(d), outerArc.centroid(d), pos]
+                });
+            // ===========================================================================================
+
+            // ===========================================================================================
+            // add tooltip to mouse events on slices and labels
+            d3.selectAll('.labelName text, .slices path').call(toolTip);
+            // ===========================================================================================
+
+            // ===========================================================================================
+            // Functions
+
+            // calculates the angle for the middle of a slice
+            function midAngle(d) { return d.startAngle + (d.endAngle - d.startAngle) / 2; }
+
+            // function that creates and adds the tool tip to a selected element
+            function toolTip(selection) {
+
+                // add tooltip (svg circle element) when mouse enters label or slice
+                selection.on('mouseenter', function (data) {
+
+                    pieChartSVG.append('text')
+                        .attr('class', 'toolCircle')
+                        .attr('dy', -15) // hard-coded. can adjust this to adjust text vertical alignment in tooltip
+                        .html(toolTipHTML(data)) // add text to the circle.
+                        .style('font-size', '.9em')
+                        .style('text-anchor', 'middle'); // centres text in tooltip
+
+                    pieChartSVG.append('circle')
+                        .attr('class', 'toolCircle')
+                        .attr('r', radius * 0.55) // radius of tooltip circle
+                        .style('fill', colour(data.data[category])) // colour based on category mouse is over
+                        .style('fill-opacity', 0.35);
+
+                });
+
+                // remove the tooltip when mouse leaves the slice/label
+                selection.on('mouseout', function () {
+                    d3.selectAll('.toolCircle').remove();
+                });
             }
 
-        })
-        .sort(function (a, b) {
-            if (treeSumSortType == "number") {
-                return b.height - a.height || b["Total College"] - a["Total College"];
-            } else {
-               return b.height - a.height || b["Percent College"] - a["Percent College"]
+            // function to create the HTML string for the tool tip. Loops through each key in data object
+            // and returns the html string key: value
+            function toolTipHTML(data) {
+
+                var tip = '',
+                    i   = 0;
+
+                for (var key in data.data) {
+                    console.log(key, data.data);
+                    // if value is a number, format it as a percentage
+                    var value = key == "Percent" ? percentFormat(data.data[key]) : data.data[key];
+
+                    // leave off 'dy' attr for first tspan so the 'dy' attr on text element works. The 'dy' attr on
+                    // tspan effectively imitates a line break.
+                    if (i === 0) tip += '<tspan x="0">' + key + ': ' + value + '</tspan>';
+                    else tip += '<tspan x="0" dy="1.2em">' + key + ': ' + value + '</tspan>';
+                    i++;
+                }
+
+                return tip;
             }
+            // ===========================================================================================
 
-        })
-    );
-
-    display(root);
-
-    function display(d) {
-        // write text into grandparent
-        // and activate click's handler
-        grandparent
-            .datum(d.parent)
-            .on("click", transition)
-            .select("text")
-            .text(name(d));
-        // grandparent color
-        grandparent
-            .datum(d.parent)
-            .select("rect")
-            .attr("fill", function () {
-                return '#6699ff'
-            });
-        var g1 = svg.insert("g", ".grandparent")
-            .datum(d)
-            .attr("class", "depth");
-        var g = g1.selectAll("g")
-            .data(d.children)
-            .enter().
-            append("g");
-        // add class and click handler to all g's with children
-        g.filter(function (d) {
-            return d.children;
-        })
-            .classed("children", true)
-            .on("click", transition);
-        g.selectAll(".child")
-            .data(function (d) {
-                return d.children || [d];
-            })
-            .enter().append("rect")
-            .attr("class", "child")
-            .call(rect);
-        // add title to parents
-        g.append("rect")
-            .attr("class", "parent")
-            .call(rect)
-            .append("title")
-            .text(function (d){
-                return d.data.name;
-            });
-        /* Adding a foreign object instead of a text object, allows for text wrapping */
-        g.append("foreignObject")
-            .call(rect)
-            .attr("class", "foreignobj")
-            .append("xhtml:div")
-            .attr("dy", ".75em")
-            .html(function (d) {
-                var html = '' +
-                    '<p class="title"> ' + d.data.name + '</p>' +
-                    '<p class="value">' + formatNumber(d.value) + '</p>';
-
-                return html;
-            })
-            .attr("class", "textdiv"); //textdiv class allows us to style the text easily with CSS
-        function transition(d) {
-            if (transitioning || !d) return;
-            transitioning = true;
-            var g2 = display(d),
-                t1 = g1.transition().duration(650),
-                t2 = g2.transition().duration(650);
-            // Update the domain only after entering new elements.
-            x.domain([d.x0, d.x1]);
-            y.domain([d.y0, d.y1]);
-            // Enable anti-aliasing during the transition.
-            svg.style("shape-rendering", null);
-            // Draw child nodes on top of parent nodes.
-            svg.selectAll(".depth").sort(function (a, b) {
-                return a.depth - b.depth;
-            });
-            // Fade-in entering text.
-            g2.selectAll("text").style("fill-opacity", 0);
-            g2.selectAll("foreignObject div").style("display", "none");
-            /*added*/
-            // Transition to the new view.
-            t1.selectAll("text").call(text).style("fill-opacity", 0);
-            t2.selectAll("text").call(text).style("fill-opacity", 1);
-            t1.selectAll("rect").call(rect);
-            t2.selectAll("rect").call(rect);
-            /* Foreign object */
-            t1.selectAll(".textdiv").style("display", "none");
-            /* added */
-            t1.selectAll(".foreignobj").call(foreign);
-            /* added */
-            t2.selectAll(".textdiv").style("display", "block");
-            /* added */
-            t2.selectAll(".foreignobj").call(foreign);
-            /* added */
-            // Remove the old node when the transition is finished.
-            t1.on("end.remove", function(){
-                this.remove();
-                transitioning = false;
-            });
-        }
-
-        document.forms[0].addEventListener("change", function() {
-            treeSumSortType = document.forms[0].elements["treeSum"].value;
-            treemap(root
-            .sum(function (d) {
-                if (treeSumSortType == "number") {
-                    color = d3.scaleLinear().domain([0, 1/4*5000000, 2/4*5000000, 3/4*5000000, 5000000]).range(["#339933", "#99ff99", "#006600", "#00ff00"]);
-                    return d["Total College"];
-                } else if (treeSumSortType == "percent") {
-                    color = d3.scaleLinear().domain([0, 1/4*50, 2/4*50, 3/4*50, 50]).range(["#ff5050", "#e6005c", "#ff8080", "#800000"]);
-                    return d["Percent College"];
-                } else if (treeSumSortType == "male") {
-                    color = d3.scaleLinear().domain([0, 1/4*50, 2/4*50, 3/4*50, 50]).range(["#0000ff", "#6699ff", "#000099", "#336699"]);
-                    return d["Percent College - Male"];
-                } else {
-                    color = d3.scaleLinear().domain([0, 1/4*50, 2/4*50, 3/4*50, 50]).range(["#ff9900", "#ffff00", "#cccc00", "#996633"]);
-                    return d["Percent College - Female"];
-                }
-
-            })
-            .sort(function (a, b) {
-                if (treeSumSortType == "number") {
-                    return b.height - a.height || b["Total College"] - a["Total College"];
-                } else if (treeSumSortType == "percent") {
-                    return b.height - a.height || b["Percent College"] - a["Percent College"];
-                } else if (treeSumSortType == "male") {
-                    return b.height - a.height || b["Percent College - Male"] - a["Percent College - Male"]
-                } else {
-                    return b.height - a.height || b["Percent College - Female"] - a["Percent College - Female"]
-                }
-
-            })
-        );
-
-        display(root);
         });
-
-        return g;
     }
 
-    function text(text) {
-        text.attr("x", function (d) {
-            return x(d.x) + 6;
-        })
-            .attr("y", function (d) {
-                return y(d.y) + 6;
-            });
-    }
+    // getter and setter functions. See Mike Bostocks post "Towards Reusable Charts" for a tutorial on how this works.
+    chart.width = function(value) {
+        if (!arguments.length) return width;
+        width = value;
+        return chart;
+    };
 
-    function rect(rect) {
-        rect
-            .attr("x", function (d) {
-                return x(d.x0);
-            })
-            .attr("y", function (d) {
-                return y(d.y0);
-            })
-            .attr("width", function (d) {
-                return x(d.x1) - x(d.x0);
-            })
-            .attr("height", function (d) {
-                return y(d.y1) - y(d.y0);
-            })
-            .attr("fill", function(d) { return color(d.value); });
-    }
+    chart.height = function(value) {
+        if (!arguments.length) return height;
+        height = value;
+        return chart;
+    };
 
-    function foreign(foreign) { /* added */
-        foreign
-            .attr("x", function (d) {
-                return x(d.x0);
-            })
-            .attr("y", function (d) {
-                return y(d.y0);
-            })
-            .attr("width", function (d) {
-                return x(d.x1) - x(d.x0);
-            })
-            .attr("height", function (d) {
-                return y(d.y1) - y(d.y0);
-            });
-    }
+    chart.margin = function(value) {
+        if (!arguments.length) return margin;
+        margin = value;
+        return chart;
+    };
 
-    function name(d) {
-        return breadcrumbs(d) +
-            (d.parent
-            ? " -  Click To Zoom Out"
-            : " - Click a Region to Inspect States");
-    }
+    chart.radius = function(value) {
+        if (!arguments.length) return radius;
+        radius = value;
+        return chart;
+    };
 
-    function breadcrumbs(d) {
-        var res = "";
-        var sep = " > ";
-        d.ancestors().reverse().forEach(function(i){
-            res += i.data.name + sep;
-        });
-        return res
-            .split(sep)
-            .filter(function(i){
-                return i!== "";
-            })
-            .join(sep);
-    }
-});
+    chart.padAngle = function(value) {
+        if (!arguments.length) return padAngle;
+        padAngle = value;
+        return chart;
+    };
+
+    chart.cornerRadius = function(value) {
+        if (!arguments.length) return cornerRadius;
+        cornerRadius = value;
+        return chart;
+    };
+
+    chart.colour = function(value) {
+        if (!arguments.length) return colour;
+        colour = value;
+        return chart;
+    };
+
+    chart.variable = function(value) {
+        if (!arguments.length) return variable;
+        variable = value;
+        return chart;
+    };
+
+    chart.category = function(value) {
+        if (!arguments.length) return category;
+        category = value;
+        return chart;
+    };
+
+    return chart;
+}
